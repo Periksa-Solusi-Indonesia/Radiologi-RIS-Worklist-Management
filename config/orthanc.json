@@ -1,0 +1,53 @@
+{
+  "Name": "Periksa Radiologi PACS",
+  "RestApiWriteToFileSystemEnabled": true,
+  "RemoteAccessAllowed": true,
+  "AuthenticationEnabled": false,
+
+  "Worklists": {
+    "Enable": true,
+    "Database": "/worklists"
+  },
+
+  "PostgreSQL": {
+    "Enable": true,
+    "EnableStorage": true,
+    "Host": "postgresql",
+    "Port": 5432,
+    "Database": "orthanc",
+    "Username": "orthanc",
+    "Password": "orthanc_password"
+  },
+
+  "ExtraMainDicomTags": {
+    "Instance": [
+      "PatientName",
+      "PatientID",
+      "PatientBirthDate",
+      "PatientSex"
+    ]
+  },
+
+  "DicomModalities": {
+    "DCMROUTER": ["DCMROUTER", "dicom-kemenkes", 11112]
+  },
+
+  "DicomAet": "ORTHANC",
+  "DicomPort": 4242,
+  "HttpPort": 8042,
+
+  "MaximumStorageSize": 0,
+  "MaximumPatientCount": 0,
+
+  "LimitFindResults": 100,
+  "LimitFindInstances": 100,
+
+  "LogExportedResources": true,
+  "LogIncomingInstancesOnDiskSpace": true,
+
+  "KeepAlive": true,
+  "TcpNoDelay": true,
+  "HttpTimeout": 60,
+  "DicomScuTimeout": 10,
+  "DicomScpTimeout": 30
+}
