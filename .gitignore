@@ -1,0 +1,35 @@
+# Environment files
+.env
+
+# Data directories (but keep structure)
+data/*
+!data/.gitkeep
+!data/postgresql/.gitkeep
+!data/orthanc/.gitkeep
+!data/worklist-static/.gitkeep
+!data/worklist-media/.gitkeep
+
+# Worklists (DICOM files)
+worklists/*
+!worklists/.gitkeep
+
+# Backup files
+backups/*
+!backups/.gitkeep
+*.tar.gz
+*.sql
+*.sql.gz
+
+# Logs
+*.log
+
+# Local configuration overrides
+docker-compose.override.yml
+
+# macOS
+.DS_Store
+
+# Editor
+*.swp
+*.swo
+*~
