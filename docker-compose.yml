@@ -71,7 +71,7 @@ services:
     ports:
       - "8081:8081"  # Database Web UI
     environment:
-      PGWEB_DATABASE_URL: "postgres://orthanc:${POSTGRES_PASSWORD:-orthanc_password}@postgresql:5432/orthanc?sslmode=disable"
+      PGWEB_DATABASE_URL: "postgres://orthanc:orthanc_password@postgresql:5432/orthanc?sslmode=disable"
     depends_on:
       postgresql:
         condition: service_healthy
@@ -89,7 +89,7 @@ services:
       POSTGRES_HOST: postgresql
       POSTGRES_PORT: 5432
       POSTGRES_USER: orthanc
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-orthanc_password}"
+      POSTGRES_PASSWORD: "orthanc_password"
       POSTGRES_DB: orthanc
 
       # Django Configuration
@@ -104,15 +104,15 @@ services:
       ORTHANC_URL: "http://orthanc:8042"
 
       # Auth Data Pasien
-      CLINIC_ID: "${KODE_KLINIK_UUID:-}"
-      PERIKSA_API_USERNAME: "${SATUSEHAT_CLIENT:-}"  # Username untuk Basic Auth
-      PERIKSA_API_PASSWORD: "${SATUSEHAT_SECRET:-}"    # Password untuk Basic Auth
+      CLINIC_ID: "${KODE_KLINIK_UUID}"
+      PERIKSA_API_USERNAME: "${SATUSEHAT_CLIENT}"  # Username untuk Basic Auth
+      PERIKSA_API_PASSWORD: "${SATUSEHAT_SECRET}"    # Password untuk Basic Auth
 
       # Satu Sehat API Configuration (Optional)
-      ORG_ID: "${SATUSEHAT_ORG_ID:-}"
-      CLIENT: "${SATUSEHAT_CLIENT:-}"
-      SECRET: "${SATUSEHAT_SECRET:-}"
-      URL: "${SATUSEHAT_URL:-https://api-satusehat.kemkes.go.id}"
+      ORG_ID: "${SATUSEHAT_ORG_ID}"
+      CLIENT: "${SATUSEHAT_CLIENT}"
+      SECRET: "${SATUSEHAT_SECRET}"
+      URL: "https://api-satusehat.kemkes.go.id"
     volumes:
       - ./worklists:/worklists
       - ./data/worklist-static:/app/staticfiles
@@ -144,7 +144,7 @@ services:
       ORG_ID: "${SATUSEHAT_ORG_ID}"
       CLIENT: "${SATUSEHAT_CLIENT}"
       SECRET: "${SATUSEHAT_SECRET}"
-      URL: "${SATUSEHAT_URL:-https://api-satusehat.kemkes.go.id}"
+      URL: "https://api-satusehat.kemkes.go.id"
       CALLBACK_URL: "http://worklist-web:8000/worklist/api/dicom-router-callback/"
     networks:
       - dicom-network
