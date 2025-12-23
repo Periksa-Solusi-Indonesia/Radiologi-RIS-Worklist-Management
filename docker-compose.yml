@@ -109,10 +109,10 @@ services:
       PERIKSA_API_PASSWORD: "${SATUSEHAT_SECRET}"    # Password untuk Basic Auth
 
       # Satu Sehat API Configuration (Optional)
-      ORG_ID: "${SATUSEHAT_ORG_ID}"
-      CLIENT: "${SATUSEHAT_CLIENT}"
-      SECRET: "${SATUSEHAT_SECRET}"
-      URL: "https://api-satusehat.kemkes.go.id"
+      SATUSEHAT_ORG_ID: "${SATUSEHAT_ORG_ID}"
+      SATUSEHAT_CLIENT: "${SATUSEHAT_CLIENT}"
+      SATUSEHAT_SECRET: "${SATUSEHAT_SECRET}"
+      SATUSEHAT_URL: "https://api-satusehat.kemkes.go.id"
     volumes:
       - ./worklists:/worklists
       - ./data/worklist-static:/app/staticfiles
