@@ -5,6 +5,7 @@ services:
     ports:
       - "8042:8042"
       - "4242:4242"
+      - "104:104"
     environment:
       ORTHANC__REGISTERED_USERS: "{}"
       VERBOSE_STARTUP: "true"
@@ -17,10 +18,10 @@ services:
       MPPS_SCP_PLUGIN_ENABLED: "true"
       MPPS_SCP_AE_TITLE: "PACS_SERVER"
       MPPS_SCP_PORT: "4242"
-      ORTHANC_DB_HOST: "postgresql"
-      ORTHANC_DB_USER: "orthanc"
-      ORTHANC_DB_PASSWORD: "orthanc_password"
-      ORTHANC_DB_NAME: "orthanc"
+      ORTHANC_DB_HOST: "${ORTHANC_DB_HOST:-postgresql}"
+      ORTHANC_DB_USER: "${ORTHANC_DB_USER:-orthanc}"
+      ORTHANC_DB_PASSWORD: "${ORTHANC_DB_PASSWORD:-change-me}"
+      ORTHANC_DB_NAME: "${ORTHANC_DB_NAME:-orthanc}"
       DICOM_WEB_PLUGIN_ENABLED: '{"DicomWeb": true, "Enable": true}'
       ORTHANC_EXPLORER_2_ENABLED: '{"Enable": true, "IsDefaultOrthancUI": false}'
       MODALITY_WORKLISTS_PLUGIN_ENABLED: "true"
@@ -29,6 +30,9 @@ services:
     volumes:
       - ./containers/orthanc/data:/var/lib/orthanc/db
       - ./containers/orthanc/config/orthanc.json:/etc/orthanc/orthanc.json
+      # Worklists volume is used for the legacy approach
+      # The recommended approach is to use the Orthanc REST API
+      # See doc/WORKLIST-API.md for more information
       - ./containers/shared/worklists:/worklists
     depends_on:
       postgresql:
@@ -40,9 +44,9 @@ services:
     image: postgres:16
     restart: unless-stopped
     environment:
-      POSTGRES_USER: orthanc
-      POSTGRES_PASSWORD: orthanc_password
-      POSTGRES_DB: orthanc
+      POSTGRES_USER: "${POSTGRES_USER:-orthanc}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-change-me}"
+      POSTGRES_DB: "${POSTGRES_DB:-orthanc}"
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
@@ -63,7 +67,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      PGWEB_DATABASE_URL: "postgres://orthanc:orthanc_password@postgresql:5432/orthanc?sslmode=disable"
+      PGWEB_DATABASE_URL: "postgres://${POSTGRES_USER:-orthanc}:${POSTGRES_PASSWORD:-change-me}@${POSTGRES_HOST:-postgresql}:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-orthanc}?sslmode=disable"
     depends_on:
       postgresql:
         condition: service_healthy
@@ -71,35 +75,29 @@ services:
       - dicom-network
 
   worklist-web:
+    # build: ./worklist_web
     image: idperiksa/periksa-radiologi-worklist:latest
     container_name: worklist_web
     restart: unless-stopped
     ports:
       - "8000:8000"
     environment:
-      POSTGRES_HOST: postgresql
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: orthanc
-      POSTGRES_PASSWORD: orthanc_password
-      POSTGRES_DB: orthanc
-      DJANGO_SUPERUSER_USERNAME: admin
-      DJANGO_SUPERUSER_PASSWORD: admin
-      DJANGO_SUPERUSER_EMAIL: admin@example.com
-      DJANGO_SECRET_KEY: "django-insecure-change-this-in-production"
-      DJANGO_DEBUG: "True"
-      DJANGO_ALLOWED_HOSTS: "*"
-      ORTHANC_URL: "http://orthanc:8042"
-      PERIKSA_API_URL: "http://periksaapis.com"
-      URL: "https://api-satusehat.kemkes.go.id"
-      
-      # ENV YANG HARUS DIGANTI SESUAI DENGAN KONFIGURASI PERIKSA API DAN SATUSEHAT KEMKES
-      CLINIC_ID: "3e6b957c-14f2-11ec-aaa7-02b7e2fe1700"
-      PERIKSA_API_USERNAME: "7aMzvF8vCG06B4EFij4zdneBZPZFfEK1PGtsIYa5G0pu7p3G"
-      PERIKSA_API_PASSWORD: "zAGQsV8oAwY24bm4oPc40YsSV64D2H7QFoXBb0NRI0PewQi959x6qQ48tTa1GOQO"
-      SATUSEHAT_ORG_ID: "100026351"
-      SATUSEHAT_CLIENT: "7aMzvF8vCG06B4EFij4zdneBZPZFfEK1PGtsIYa5G0pu7p3G"
-      SATUSEHAT_SECRET: "zAGQsV8oAwY24bm4oPc40YsSV64D2H7QFoXBb0NRI0PewQi959x6qQ48tTa1GOQO"
-      
+      POSTGRES_HOST: "${POSTGRES_HOST:-postgresql}"
+      POSTGRES_PORT: "${POSTGRES_PORT:-5432}"
+      POSTGRES_USER: "${POSTGRES_USER:-orthanc}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-change-me}"
+      POSTGRES_DB: "${POSTGRES_DB:-orthanc}"
+      DJANGO_SUPERUSER_USERNAME: "${DJANGO_SUPERUSER_USERNAME:-admin}"
+      DJANGO_SUPERUSER_PASSWORD: "${DJANGO_SUPERUSER_PASSWORD:-change-me-admin}"
+      DJANGO_SUPERUSER_EMAIL: "${DJANGO_SUPERUSER_EMAIL:-admin@example.com}"
+      DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY:-change-this-in-env}"
+      DJANGO_DEBUG: "${DJANGO_DEBUG:-False}"
+      DJANGO_ALLOWED_HOSTS: "${DJANGO_ALLOWED_HOSTS:-*}"
+      ORTHANC_URL: "${ORTHANC_URL:-http://orthanc:8042}"
+      SATUSEHAT_URL: "${SATUSEHAT_URL:-https://api-satusehat.kemkes.go.id}"
+      SATUSEHAT_ORG_ID: "${SATUSEHAT_ORG_ID:-}"
+      SATUSEHAT_CLIENT: "${SATUSEHAT_CLIENT:-}"
+      SATUSEHAT_SECRET: "${SATUSEHAT_SECRET:-}"
     volumes:
       - ./containers/shared/worklists:/worklists
       - ./containers/worklist-web/runtime/staticfiles:/app/staticfiles
@@ -118,18 +116,17 @@ services:
       - "11112:11112"
       - "8080:8080"
     environment:
-      URL: "https://api-satusehat.kemkes.go.id"
-      ORG_ID: "100026351"
-      CLIENT: "7aMzvF8vCG06B4EFij4zdneBZPZFfEK1PGtsIYa5G0pu7p3G"
-      SECRET: "zAGQsV8oAwY24bm4oPc40YsSV64D2H7QFoXBb0NRI0PewQi959x6qQ48tTa1GOQO"
+      - ORG_ID=${SATUSEHAT_ORG_ID:-}
+      - CLIENT=${SATUSEHAT_CLIENT:-}
+      - SECRET=${SATUSEHAT_SECRET:-}
+      - URL=${SATUSEHAT_URL:-https://api-satusehat.kemkes.go.id}
     networks:
       - dicom-network
-
   backup:
-    image: postgres:16
+    image: postgres:14
     restart: "no"
     environment:
-      PGPASSWORD: orthanc_password
+      PGPASSWORD: "${POSTGRES_PASSWORD:-change-me}"
     volumes:
       - ./containers/backup/data:/backups
       - ./scripts:/scripts
