@@ -1,21 +1,16 @@
 # Environment files
 .env
 
-# Data directories (but keep structure)
-data/*
-!data/.gitkeep
-!data/postgresql/.gitkeep
-!data/orthanc/.gitkeep
-!data/worklist-static/.gitkeep
-!data/worklist-media/.gitkeep
+# Data directories
+containers/orthanc/data/
+containers/postgresql/data/
+containers/worklist-web/runtime/
+containers/backup/data/
 
 # Worklists (DICOM files)
-worklists/*
-!worklists/.gitkeep
+containers/shared/worklists/*.wl
 
 # Backup files
-backups/*
-!backups/.gitkeep
 *.tar.gz
 *.sql
 *.sql.gz

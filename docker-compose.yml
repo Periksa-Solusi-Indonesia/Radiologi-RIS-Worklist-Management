@@ -1,13 +1,10 @@
-version: "3.8"
-
 services:
   orthanc:
     image: orthancteam/orthanc:latest-full
     restart: unless-stopped
     ports:
-      - "8042:8042"  # Orthanc Web UI & REST API
-      - "4242:4242"  # DICOM Protocol
-      - "104:104"    # DICOM Protocol (Standard port - requires privileged)
+      - "8042:8042"
+      - "4242:4242"
     environment:
       ORTHANC__REGISTERED_USERS: "{}"
       VERBOSE_STARTUP: "true"
@@ -28,35 +25,30 @@ services:
       ORTHANC_EXPLORER_2_ENABLED: '{"Enable": true, "IsDefaultOrthancUI": false}'
       MODALITY_WORKLISTS_PLUGIN_ENABLED: "true"
       MODALITY_WORKLISTS_DIRECTORY: "/worklists"
-      ORTHANC__Verbose: "false"
+      ORTHANC__Verbose: "true"
     volumes:
-      - ./data/orthanc:/var/lib/orthanc/db
-      - ./config/orthanc.json:/etc/orthanc/orthanc.json:ro
-      - ./worklists:/worklists
+      - ./containers/orthanc/data:/var/lib/orthanc/db
+      - ./containers/orthanc/config/orthanc.json:/etc/orthanc/orthanc.json
+      - ./containers/shared/worklists:/worklists
     depends_on:
       postgresql:
         condition: service_healthy
     networks:
       - dicom-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8042/system"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   postgresql:
     image: postgres:16
     restart: unless-stopped
     environment:
       POSTGRES_USER: orthanc
-      POSTGRES_PASSWORD: "orthanc_password"
+      POSTGRES_PASSWORD: orthanc_password
       POSTGRES_DB: orthanc
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
-      - ./data/postgresql:/var/lib/postgresql/data
+      - ./containers/postgresql/data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U orthanc -d orthanc"]
       interval: 10s
@@ -69,7 +61,7 @@ services:
     image: sosedoff/pgweb
     restart: unless-stopped
     ports:
-      - "8081:8081"  # Database Web UI
+      - "8081:8081"
     environment:
       PGWEB_DATABASE_URL: "postgres://orthanc:orthanc_password@postgresql:5432/orthanc?sslmode=disable"
     depends_on:
@@ -79,85 +71,68 @@ services:
       - dicom-network
 
   worklist-web:
-    image: idperiksa/periksa-radiologi-worklist:${WORKLIST_IMAGE_TAG:-latest}
+    image: idperiksa/periksa-radiologi-worklist:latest
     container_name: worklist_web
     restart: unless-stopped
     ports:
-      - "8000:8000"  # Django Web Application
+      - "8000:8000"
     environment:
-      # Database Configuration
       POSTGRES_HOST: postgresql
       POSTGRES_PORT: 5432
       POSTGRES_USER: orthanc
-      POSTGRES_PASSWORD: "orthanc_password"
+      POSTGRES_PASSWORD: orthanc_password
       POSTGRES_DB: orthanc
-
-      # Django Configuration
-      DJANGO_SUPERUSER_USERNAME: "admin"
-      DJANGO_SUPERUSER_PASSWORD: "admin"
-      DJANGO_SUPERUSER_EMAIL: "support@periksa.id"
-      DJANGO_SECRET_KEY: "kMXWI8ljE3"
-      DJANGO_DEBUG: "false"
+      DJANGO_SUPERUSER_USERNAME: admin
+      DJANGO_SUPERUSER_PASSWORD: admin
+      DJANGO_SUPERUSER_EMAIL: admin@example.com
+      DJANGO_SECRET_KEY: "django-insecure-change-this-in-production"
+      DJANGO_DEBUG: "True"
       DJANGO_ALLOWED_HOSTS: "*"
-
-      # Orthanc Configuration
       ORTHANC_URL: "http://orthanc:8042"
-
-      # Auth Data Pasien
-      CLINIC_ID: "${KODE_KLINIK_UUID}"
-      PERIKSA_API_USERNAME: "${SATUSEHAT_CLIENT}"  # Username untuk Basic Auth
-      PERIKSA_API_PASSWORD: "${SATUSEHAT_SECRET}"    # Password untuk Basic Auth
-
-      # Satu Sehat API Configuration (Optional)
-      SATUSEHAT_ORG_ID: "${SATUSEHAT_ORG_ID}"
-      SATUSEHAT_CLIENT: "${SATUSEHAT_CLIENT}"
-      SATUSEHAT_SECRET: "${SATUSEHAT_SECRET}"
-      SATUSEHAT_URL: "https://api-satusehat.kemkes.go.id"
+      PERIKSA_API_URL: "http://periksaapis.com"
+      URL: "https://api-satusehat.kemkes.go.id"
+      
+      # ENV YANG HARUS DIGANTI SESUAI DENGAN KONFIGURASI PERIKSA API DAN SATUSEHAT KEMKES
+      CLINIC_ID: "3e6b957c-14f2-11ec-aaa7-02b7e2fe1700"
+      PERIKSA_API_USERNAME: "7aMzvF8vCG06B4EFij4zdneBZPZFfEK1PGtsIYa5G0pu7p3G"
+      PERIKSA_API_PASSWORD: "zAGQsV8oAwY24bm4oPc40YsSV64D2H7QFoXBb0NRI0PewQi959x6qQ48tTa1GOQO"
+      SATUSEHAT_ORG_ID: "100026351"
+      SATUSEHAT_CLIENT: "7aMzvF8vCG06B4EFij4zdneBZPZFfEK1PGtsIYa5G0pu7p3G"
+      SATUSEHAT_SECRET: "zAGQsV8oAwY24bm4oPc40YsSV64D2H7QFoXBb0NRI0PewQi959x6qQ48tTa1GOQO"
+      
     volumes:
-      - ./worklists:/worklists
-      - ./data/worklist-static:/app/staticfiles
-      - ./data/worklist-media:/app/media
+      - ./containers/shared/worklists:/worklists
+      - ./containers/worklist-web/runtime/staticfiles:/app/staticfiles
+      - ./containers/worklist-web/runtime/media:/app/media
     depends_on:
       postgresql:
         condition: service_healthy
-      orthanc:
-        condition: service_healthy
     networks:
       - dicom-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
-  # Optional: Kemenkes DICOM Router
-  # Uncomment this section if you need to integrate with Kemenkes DICOM Router
   dicom-kemenkes:
     image: registry.dto.kemkes.go.id/pub/dicom-router:latest
     container_name: dicom-router
     restart: always
     ports:
-      - "11112:11112"  # DICOM Router
-      - "8080:8080"    # Router Web UI
+      - "11112:11112"
+      - "8080:8080"
     environment:
-      ORG_ID: "${SATUSEHAT_ORG_ID}"
-      CLIENT: "${SATUSEHAT_CLIENT}"
-      SECRET: "${SATUSEHAT_SECRET}"
       URL: "https://api-satusehat.kemkes.go.id"
-      CALLBACK_URL: "http://worklist-web:8000/worklist/api/dicom-router-callback/"
+      ORG_ID: "100026351"
+      CLIENT: "7aMzvF8vCG06B4EFij4zdneBZPZFfEK1PGtsIYa5G0pu7p3G"
+      SECRET: "zAGQsV8oAwY24bm4oPc40YsSV64D2H7QFoXBb0NRI0PewQi959x6qQ48tTa1GOQO"
     networks:
       - dicom-network
 
-  # Backup Service (run manually with: docker-compose --profile backup run backup)
   backup:
     image: postgres:16
     restart: "no"
     environment:
-      PGPASSWORD: "orthanc_password"
+      PGPASSWORD: orthanc_password
     volumes:
-      - ./backups:/backups
-      - ./scripts:/scripts:ro
+      - ./containers/backup/data:/backups
+      - ./scripts:/scripts
     networks:
       - dicom-network
     profiles:

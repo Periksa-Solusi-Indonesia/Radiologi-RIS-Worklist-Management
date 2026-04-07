@@ -13,47 +13,26 @@ Get your Radiology Information System running in 5 minutes!
 ### 1️⃣ Download
 
 ```bash
-# Clone the repository
 git clone https://github.com/your-org/Radiologi_RIS.git
-cd Radiologi_RIS/deployment
+cd Radiologi_RIS
 ```
 
-Or download and extract the deployment folder.
-
-### 2️⃣ Configure (Optional)
+### 2️⃣ Start
 
 ```bash
-# Copy environment template
-cp .env.example .env
-
-# (Optional) Edit configuration
-nano .env
-```
-
-**Quick Start:** Bisa skip step ini dan langsung pakai default configuration!
-
-### 3️⃣ Start
-
-```bash
-# Start all services
 docker-compose up -d
 
 # Wait for services to be ready (30-60 seconds)
 docker-compose ps
 ```
 
-### 4️⃣ Access
+### 3️⃣ Access
 
-**Worklist Management:**
-- URL: http://localhost:8000
-- Username: `admin`
-- Password: `admin`
-
-**PACS Server (Orthanc):**
-- URL: http://localhost:8042
-
-**Database Viewer:**
-- URL: http://localhost:8081
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| **Worklist Web** | http://localhost:8000 | `admin` / `admin` |
+| **Orthanc PACS** | http://localhost:8042 | - |
+| **Database Viewer** | http://localhost:8081 | - |
 
 ## Basic Usage
 
@@ -65,19 +44,15 @@ docker-compose ps
 4. Fill in patient information
 5. Click "Save"
 
-### View in DICOM Modality
+### DICOM Integration
 
-Your DICOM modality can now query worklists from:
+Configure your DICOM modality:
+
 - **AE Title:** `ORTHANC`
 - **Host:** Your server IP
 - **Port:** `4242`
 
-### Send DICOM Images
-
-Configure your modality to send images to:
-- **AE Title:** `ORTHANC`
-- **Host:** Your server IP
-- **Port:** `4242`
+Worklist query dan image send menggunakan address yang sama.
 
 View received images at: http://localhost:8042
 
@@ -94,19 +69,15 @@ docker-compose down -v
 ## Backup
 
 ```bash
-# Create backup
 docker-compose --profile backup run --rm backup /scripts/backup.sh
 ```
 
-Backups saved to `./backups/` folder.
+Backups saved to `./containers/backup/data/` folder.
 
 ## Update
 
 ```bash
-# Pull latest version
 docker-compose pull
-
-# Restart services
 docker-compose up -d
 ```
 
@@ -115,18 +86,13 @@ docker-compose up -d
 ### Services not starting?
 
 ```bash
-# Check logs
 docker-compose logs -f
-
-# Check if ports are available
-lsof -i :8000
-lsof -i :8042
 ```
 
 ### Can't access web interface?
 
 1. Wait 60 seconds for services to fully start
-2. Check: `docker-compose ps` - all should be "healthy"
+2. Check: `docker-compose ps` — all should be "healthy"
 3. Try: `docker-compose restart`
 
 ### Port already in use?
@@ -139,17 +105,9 @@ ports:
 
 ## Next Steps
 
-✅ **Production Setup:** Read [README.md](README.md) for security configuration
-
-✅ **Integration:** Configure your DICOM modality to connect
-
-✅ **Backup:** Setup automatic daily backups
-
-## Need Help?
-
-- 📖 Full documentation: [README.md](README.md)
-- 🐛 Issues: Open a GitHub issue
-- 💬 Questions: Check documentation first
+- **Production Setup:** Read [README.md](README.md) for security configuration
+- **Integration:** Configure your DICOM modality to connect
+- **Backup:** Setup automatic daily backups
 
 ---
 
