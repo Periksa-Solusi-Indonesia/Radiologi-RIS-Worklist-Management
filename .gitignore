@@ -2,10 +2,11 @@
 .env
 
 # Data directories
-containers/orthanc/data/
-containers/postgresql/data/
-containers/worklist-web/runtime/
-containers/backup/data/
+containers/orthanc/data/*
+containers/postgresql/data/*
+containers/worklist-web/runtime/*
+containers/backup/data/*
+containers/shared/worklists/*
 
 # Worklists (DICOM files)
 containers/shared/worklists/*.wl

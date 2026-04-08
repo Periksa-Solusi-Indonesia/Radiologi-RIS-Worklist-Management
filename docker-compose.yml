@@ -54,7 +54,7 @@ services:
     volumes:
       - ./containers/postgresql/data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U orthanc -d orthanc"]
+      test: [ "CMD-SHELL", "pg_isready -U orthanc -d orthanc" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -123,6 +123,7 @@ services:
       - CLIENT=${SATUSEHAT_CLIENT:-}
       - SECRET=${SATUSEHAT_SECRET:-}
       - URL=${SATUSEHAT_URL:-https://api-satusehat.kemkes.go.id}
+      - AE_TITLE=${AE_TITLE:-}
     networks:
       - dicom-network
   backup:
