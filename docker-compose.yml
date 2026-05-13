@@ -119,11 +119,11 @@ services:
       - "11112:11112"
       - "8080:8080"
     environment:
-      - ORG_ID=${SATUSEHAT_ORG_ID:-}
-      - CLIENT=${SATUSEHAT_CLIENT:-}
-      - SECRET=${SATUSEHAT_SECRET:-}
-      - URL=${SATUSEHAT_URL:-https://api-satusehat.kemkes.go.id}
-      - AE_TITLE=${AE_TITLE:-}
+      - organization_id=${SATUSEHAT_ORG_ID:-}
+      - client_key=${SATUSEHAT_CLIENT:-}
+      - secret_key=${SATUSEHAT_SECRET:-}
+      - url=${SATUSEHAT_URL:-https://api-satusehat.kemkes.go.id}
+      - calling_ae_title=${AE_TITLE:-}
     networks:
       - dicom-network
   backup:
