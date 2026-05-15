@@ -118,6 +118,8 @@ services:
     ports:
       - "11112:11112"
       - "8080:8080"
+    volumes:
+      - ./containers/dicom-router/router.conf:/app/router.conf
     environment:
       - organization_id=${SATUSEHAT_ORG_ID:-}
       - client_key=${SATUSEHAT_CLIENT:-}
