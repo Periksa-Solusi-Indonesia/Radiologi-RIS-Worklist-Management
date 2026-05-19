@@ -6,6 +6,7 @@
     "Enable": true,
     "Database": "/worklists"
   },
+  "LuaScripts": ["/scripts/on_stable_study.lua"],
   "PostgreSQL": {
     "Enable": true,
     "EnableStorage": true,
