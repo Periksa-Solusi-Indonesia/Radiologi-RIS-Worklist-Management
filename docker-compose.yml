@@ -99,7 +99,8 @@ services:
       SATUSEHAT_ORG_ID: ""
       SATUSEHAT_CLIENT: ""
       SATUSEHAT_SECRET: ""
-      SATUSEHAT_AUTO_PROVISION: "False"
+      SATUSEHAT_LOCATION_ID: ""
+      SATUSEHAT_AUTO_PROVISION: "True"
     volumes:
       - ./containers/shared/worklists:/worklists
       - ./containers/worklist-web/runtime/staticfiles:/app/staticfiles
