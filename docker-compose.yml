@@ -73,7 +73,7 @@ services:
       - dicom-network
 
   worklist-web:
-    build: ./worklist_web
+    build: ./worklist-web
     # image: idperiksa/periksa-radiologi-worklist:latest
     container_name: worklist_web
     restart: unless-stopped
